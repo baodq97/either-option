@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar
 from typing_extensions import Never, Self, final, override
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterator
 
 T = TypeVar("T")  # invariant — used only in classmethod factories
 T_co = TypeVar("T_co", covariant=True)
@@ -19,6 +19,7 @@ U = TypeVar("U")
 E = TypeVar("E")  # invariant — used only in classmethod factories
 E_co = TypeVar("E_co", covariant=True)
 F = TypeVar("F")
+R = TypeVar("R")
 
 
 # ---------------------------------------------------------------------------
@@ -64,6 +65,24 @@ class Option(ABC, Generic[T_co]):
     @abstractmethod
     @override
     def __hash__(self) -> int: ...
+
+    # ---- Iteration --------------------------------------------------------
+
+    @abstractmethod
+    def __iter__(self) -> Iterator[T_co]: ...
+
+    def to_iterable(self) -> Iterator[T_co]:
+        """Return an iterator over 0 or 1 elements."""
+        return iter(self)
+
+    def __contains__(self, value: object) -> bool:
+        return self.contains(value)
+
+    @abstractmethod
+    def contains(self, value: object) -> bool: ...
+
+    @abstractmethod
+    def exists(self, predicate: Callable[[T_co], bool]) -> bool: ...
 
     # ---- Method signatures for the typing spike -----------------------
     # Bodies are stubs; landed in later Tasks. The signatures below are
@@ -126,6 +145,20 @@ class Some(Option[T_co]):
     @override
     def __repr__(self) -> str:
         return f"Some({self.value!r})"
+
+    # ---- Iteration --------------------------------------------------------
+
+    @override
+    def __iter__(self) -> Iterator[T_co]:
+        yield self.value
+
+    @override
+    def contains(self, value: object) -> bool:
+        return bool(self.value == value)
+
+    @override
+    def exists(self, predicate: Callable[[T_co], bool]) -> bool:
+        return bool(predicate(self.value))
 
     # Stub bodies — TODO Tasks 4-7 implement.
     @override
@@ -192,6 +225,20 @@ class Nothing(Option[Never]):
     @override
     def __repr__(self) -> str:
         return "Nothing"
+
+    # ---- Iteration --------------------------------------------------------
+
+    @override
+    def __iter__(self) -> Iterator[Never]:
+        return iter(())
+
+    @override
+    def contains(self, value: object) -> bool:
+        return False
+
+    @override
+    def exists(self, predicate: Callable[[Any], bool]) -> bool:
+        return False
 
     @override
     def value_or(self, alternative: U) -> U:
@@ -266,12 +313,12 @@ class Either(ABC, Generic[T_co, E_co]):
         return self.is_success
 
     @classmethod
-    def some(cls, value: T) -> Success[T]:
+    def some(cls, value: T) -> Either[T, Never]:
         """Create a Success wrapping the given value."""
         return Success(value)
 
     @classmethod
-    def none(cls, exception: E) -> Failure[E]:
+    def none(cls, exception: E) -> Either[Never, E]:
         """Create a Failure wrapping the given exception."""
         return Failure(exception)
 
@@ -282,6 +329,24 @@ class Either(ABC, Generic[T_co, E_co]):
     @abstractmethod
     @override
     def __hash__(self) -> int: ...
+
+    # ---- Iteration --------------------------------------------------------
+
+    @abstractmethod
+    def __iter__(self) -> Iterator[T_co]: ...
+
+    def to_iterable(self) -> Iterator[T_co]:
+        """Return an iterator over 0 or 1 elements."""
+        return iter(self)
+
+    def __contains__(self, value: object) -> bool:
+        return self.contains(value)
+
+    @abstractmethod
+    def contains(self, value: object) -> bool: ...
+
+    @abstractmethod
+    def exists(self, predicate: Callable[[T_co], bool]) -> bool: ...
 
     # Method-signature stubs for the typing spike.
     @abstractmethod
@@ -355,6 +420,20 @@ class Success(Either[T_co, Never]):
     @override
     def __repr__(self) -> str:
         return f"Success({self.value!r})"
+
+    # ---- Iteration --------------------------------------------------------
+
+    @override
+    def __iter__(self) -> Iterator[T_co]:
+        yield self.value
+
+    @override
+    def contains(self, value: object) -> bool:
+        return bool(self.value == value)
+
+    @override
+    def exists(self, predicate: Callable[[T_co], bool]) -> bool:
+        return bool(predicate(self.value))
 
     @override
     def value_or(self, alternative: U) -> T_co | U:
@@ -437,6 +516,20 @@ class Failure(Either[Never, E_co]):
     @override
     def __repr__(self) -> str:
         return f"Failure({self.exception!r})"
+
+    # ---- Iteration --------------------------------------------------------
+
+    @override
+    def __iter__(self) -> Iterator[Never]:
+        return iter(())
+
+    @override
+    def contains(self, value: object) -> bool:
+        return False
+
+    @override
+    def exists(self, predicate: Callable[[Any], bool]) -> bool:
+        return False
 
     @override
     def value_or(self, alternative: U) -> U:

@@ -10,12 +10,14 @@ from optional_python._core import (
     nothing,
     some,
 )
+from optional_python.unsafe import OptionValueMissingError
 
 __all__ = [
     "Either",
     "Failure",
     "Nothing",
     "Option",
+    "OptionValueMissingError",
     "Some",
     "Success",
     "nothing",
