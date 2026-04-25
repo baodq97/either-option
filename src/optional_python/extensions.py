@@ -31,7 +31,9 @@ Usage::
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypeVar, overload
+from typing import TYPE_CHECKING, TypeVar
+
+from typing_extensions import overload
 
 if TYPE_CHECKING:
     from collections.abc import Callable
