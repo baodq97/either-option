@@ -179,7 +179,7 @@ class Some(Option[T_co]):
     # Stub bodies — TODO Tasks 6-7 implement.
     @override
     def value_or(self, alternative: U) -> T_co | U:
-        raise NotImplementedError
+        return self.value
 
     @override
     def or_value(self, alternative: U) -> Option[T_co | U]:
@@ -278,7 +278,7 @@ class Nothing(Option[Never]):
 
     @override
     def value_or(self, alternative: U) -> U:
-        raise NotImplementedError
+        return alternative
 
     @override
     def or_value(self, alternative: U) -> Option[U]:
@@ -512,7 +512,7 @@ class Success(Either[T_co, Never]):
 
     @override
     def value_or(self, alternative: U) -> T_co | U:
-        raise NotImplementedError
+        return self.value
 
     @override
     def or_value(self, alternative: U) -> Either[T_co | U, Never]:
@@ -632,7 +632,7 @@ class Failure(Either[Never, E_co]):
 
     @override
     def value_or(self, alternative: U) -> U:
-        raise NotImplementedError
+        return alternative
 
     @override
     def or_value(self, alternative: U) -> Either[U, E_co]:
