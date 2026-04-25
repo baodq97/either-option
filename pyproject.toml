@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "typing-extensions>=4.15.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.11,<0.12"]
@@ -71,6 +73,10 @@ known-first-party = ["optional_python"]
 "tests/**/*.py" = [
     "S101",     # use-of-assert  (pytest mechanic)
     "INP001",   # tests/ is intentionally a non-package
+    "D100",     # missing docstring in public module
+    "D103",     # missing docstring in public function  (test names are self-doc)
+    "PLR2004",  # magic value in comparison  (intentional in tests)
+    "PLR6301",  # method could be function  (pytest fixture injection pattern)
 ]
 
 [tool.ruff.format]
