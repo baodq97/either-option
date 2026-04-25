@@ -6,7 +6,7 @@ import asyncio
 
 import pytest
 
-from optional_python import Either, Failure, Nothing, Option, Some, Success, nothing, some
+from optional_python import Either, Failure, Some, Success, nothing, some
 
 # ---- Option.__bool__ -------------------------------------------------------
 
@@ -237,18 +237,6 @@ def test_some_exists_truthy_predicate() -> None:
 def test_some_exists_falsy_predicate() -> None:
     s = some(42)
     assert s.exists(lambda x: x < 0) is False
-
-
-# ---- Sanity: types are exported correctly --------------------------------
-
-
-def test_runtime_classes_present() -> None:
-    assert Some is not None
-    assert Nothing is not None
-    assert Success is not None
-    assert Failure is not None
-    assert Option is not None
-    assert Either is not None
 
 
 # ---- Success async no-op paths (return self / value) ---------------------

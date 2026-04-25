@@ -855,7 +855,7 @@ class Success(Either[T_co, Never]):
 
     @override
     def __reduce__(self) -> tuple[Any, tuple[Any]]:
-        return (Success, (self.value,))
+        return (Either.some, (self.value,))
 
     # ---- Iteration --------------------------------------------------------
 
@@ -1137,7 +1137,7 @@ class Failure(Either[Never, E_co]):
 
     @override
     def __reduce__(self) -> tuple[Any, tuple[Any]]:
-        return (Failure, (self.exception,))
+        return (Either.none, (self.exception,))
 
     # ---- Iteration --------------------------------------------------------
 
