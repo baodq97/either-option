@@ -1,0 +1,140 @@
+[project]
+name = "optional-python"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.11,<0.12"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.7",
+    "pyright>=1.1.385",
+    "pytest>=8.0",
+]
+
+# ===========================================================================
+# uv — package manager / runner
+# ===========================================================================
+[tool.uv]
+required-version = ">=0.11"     # contributors trên uv quá cũ sẽ bị từ chối
+default-groups = ["dev"]        # `uv sync` mặc định cài luôn dev tools
+link-mode = "copy"              # Windows: cache khác ổ với venv → hardlink fail
+
+# ===========================================================================
+# Ruff — lint + format. Strictest possible: select ALL, only disable rules
+# that ruff itself requires disabled (formatter conflicts, deprecated codes).
+# ===========================================================================
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+src = ["src", "tests"]
+extend-exclude = ["reference"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    # --- Formatter conflicts (per ruff formatter docs; must be disabled) ---
+    "W191",     # tab-indentation
+    "E111",     # indentation-with-invalid-multiple
+    "E114",
+    "E117",
+    "D206",     # indent-with-spaces (pydocstyle)
+    "D300",     # triple-single-quotes (pydocstyle)
+    "Q000",     # bad-quotes-inline-string
+    "Q001",     # bad-quotes-multiline-string
+    "Q002",     # bad-quotes-docstring
+    "Q003",     # avoidable-escaped-quote
+    "COM812",   # missing-trailing-comma  (formatter handles)
+    "COM819",   # prohibited-trailing-comma
+    "ISC001",   # single-line-implicit-string-concatenation
+    "ISC002",   # multi-line-implicit-string-concatenation
+]
+unfixable = []
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.isort]
+known-first-party = ["optional_python"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests must be allowed to use `assert` — that is literally how pytest works.
+# This is a tooling necessity, not a quality compromise.
+"tests/**/*.py" = [
+    "S101",     # use-of-assert  (pytest mechanic)
+    "INP001",   # tests/ is intentionally a non-package
+]
+
+[tool.ruff.format]
+preview = true
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+skip-magic-trailing-comma = false
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+
+# ===========================================================================
+# Pyright — strict + every overrideable diagnostic bumped to "error".
+# ===========================================================================
+[tool.pyright]
+include = ["src", "tests"]
+exclude = [
+    "reference",
+    "**/__pycache__",
+    ".venv",
+    "build",
+    "dist",
+]
+pythonVersion = "3.10"
+pythonPlatform = "All"
+typeCheckingMode = "strict"
+
+# Bump every diagnostic that strict mode leaves at "warning" or "information"
+# up to "error". Anything not listed already defaults to "error" under strict.
+reportMissingTypeStubs               = "error"
+reportMissingModuleSource            = "error"
+reportUnnecessaryTypeIgnoreComment   = "error"
+reportImplicitOverride               = "error"
+reportImplicitStringConcatenation    = "error"
+reportPropertyTypeMismatch           = "error"
+reportImportCycles                   = "error"
+reportUnusedCallResult               = "error"
+reportUnnecessaryIsInstance          = "error"
+reportUnnecessaryCast                = "error"
+reportUnnecessaryComparison          = "error"
+reportUnnecessaryContains            = "error"
+reportCallInDefaultInitializer       = "error"
+reportUninitializedInstanceVariable  = "error"
+reportMissingSuperCall               = "error"
+reportSelfClsParameterName           = "error"
+reportTypeCommentUsage               = "error"
+reportDeprecated                     = "error"
+reportConstantRedefinition           = "error"
+reportInconsistentConstructor        = "error"
+reportOverlappingOverload            = "error"
+reportPossiblyUnboundVariable        = "error"
+reportPrivateUsage                   = "error"
+reportInvalidStubStatement           = "error"
+reportIncompleteStub                 = "error"
+reportInvalidTypeVarUse              = "error"
+reportUnsupportedDunderAll           = "error"
+reportUnusedExpression               = "error"
+reportMatchNotExhaustive             = "error"
+
+# ===========================================================================
+# Pytest
+# ===========================================================================
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["--strict-markers", "--strict-config", "-ra"]
+xfail_strict = true
+filterwarnings = ["error"]

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(uv *)",
+      "Bash(uvx *)"
+    ],
+    "ask": [
+      "Bash(uv publish *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "bash .claude/hooks/format-py.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "bash .claude/hooks/verify.sh",
+            "timeout": 180,
+            "asyncRewake": true,
+            "rewakeMessage": "Verify loop failed before stop. Output below — fix before declaring done:",
+            "rewakeSummary": "verify loop failed"
+          }
+        ]
+      }
+    ]
+  }
+}
