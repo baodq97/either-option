@@ -11,3 +11,9 @@ wheels/
 
 # Reference / upstream sources for porting (not shipped, not tracked)
 reference/
+
+# Coverage data
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
