@@ -17,6 +17,7 @@ dev = [
     "ruff>=0.7",
     "pyright>=1.1.385",
     "pytest>=8.0",
+    "pytest-cov>=5.0",
 ]
 
 # ===========================================================================
@@ -77,6 +78,9 @@ known-first-party = ["optional_python"]
     "D103",     # missing docstring in public function  (test names are self-doc)
     "PLR2004",  # magic value in comparison  (intentional in tests)
     "PLR6301",  # method could be function  (pytest fixture injection pattern)
+    "ERA001",   # commented-out code  (false positives on section headers)
+    "PLW0108",  # unnecessary lambda  (test laziness via lambda is intentional)
+    "RUF100",   # unused noqa  (covers test-file ignore directives)
 ]
 
 [tool.ruff.format]
@@ -144,3 +148,26 @@ testpaths = ["tests"]
 addopts = ["--strict-markers", "--strict-config", "-ra"]
 xfail_strict = true
 filterwarnings = ["error"]
+
+# ===========================================================================
+# Coverage
+# ===========================================================================
+[tool.coverage.run]
+branch = true
+source = ["src/optional_python"]
+omit = [
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 100
+exclude_also = [
+    # Defensive guards that should never run for well-typed callers.
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+    "@overload",
+    "\\.\\.\\.$",  # bare ellipsis on stub bodies
+]

@@ -128,6 +128,14 @@ class Option(ABC, Generic[T_co]):
     @abstractmethod
     def value_or_else(self, factory: Callable[[], U]) -> T_co | U: ...
 
+    # ---- Alternatives (Task 5) --------------------------------------------
+
+    @abstractmethod
+    def or_else(self, factory: Callable[[], U]) -> Option[T_co | U]: ...
+
+    @abstractmethod
+    def or_option_else(self, factory: Callable[[], Option[U]]) -> Option[T_co | U]: ...
+
 
 @final
 class Some(Option[T_co]):
@@ -183,11 +191,11 @@ class Some(Option[T_co]):
 
     @override
     def or_value(self, alternative: U) -> Option[T_co | U]:
-        raise NotImplementedError
+        return self
 
     @override
     def or_option(self, alternative: Option[U]) -> Option[T_co | U]:
-        raise NotImplementedError
+        return self
 
     @override
     def with_exception(self, exception: E_co) -> Either[T_co, E_co]:
@@ -228,6 +236,16 @@ class Some(Option[T_co]):
     @override
     def value_or_else(self, factory: Callable[[], U]) -> T_co | U:
         return self.value
+
+    # ---- Alternatives (Task 5) --------------------------------------------
+
+    @override
+    def or_else(self, factory: Callable[[], U]) -> Option[T_co | U]:
+        return self
+
+    @override
+    def or_option_else(self, factory: Callable[[], Option[U]]) -> Option[T_co | U]:
+        return self
 
 
 @final
@@ -282,11 +300,11 @@ class Nothing(Option[Never]):
 
     @override
     def or_value(self, alternative: U) -> Option[U]:
-        raise NotImplementedError
+        return Some(alternative)
 
     @override
     def or_option(self, alternative: Option[U]) -> Option[U]:
-        raise NotImplementedError
+        return alternative
 
     @override
     def with_exception(self, exception: E_co) -> Either[Never, E_co]:
@@ -326,6 +344,16 @@ class Nothing(Option[Never]):
 
     @override
     def value_or_else(self, factory: Callable[[], U]) -> U:
+        return factory()
+
+    # ---- Alternatives (Task 5) --------------------------------------------
+
+    @override
+    def or_else(self, factory: Callable[[], U]) -> Option[U]:
+        return Some(factory())
+
+    @override
+    def or_option_else(self, factory: Callable[[], Option[U]]) -> Option[U]:
         return factory()
 
 
@@ -412,7 +440,7 @@ class Either(ABC, Generic[T_co, E_co]):
     def or_value(self, alternative: U) -> Either[T_co | U, E_co]: ...
 
     @abstractmethod
-    def or_option(self, alternative: Either[U, E_co]) -> Either[T_co | U, E_co]: ...
+    def or_option(self, alternative: Either[U, F]) -> Either[T_co | U, E_co | F]: ...
 
     @abstractmethod
     def map(self, mapping: Callable[[T_co], U]) -> Either[U, E_co]: ...
@@ -459,6 +487,22 @@ class Either(ABC, Generic[T_co, E_co]):
 
     @abstractmethod
     def value_or_with(self, mapping: Callable[[E_co], U]) -> T_co | U: ...
+
+    # ---- Alternatives (Task 5) --------------------------------------------
+
+    @abstractmethod
+    def or_else(self, factory: Callable[[], U]) -> Either[T_co | U, E_co]: ...
+
+    @abstractmethod
+    def or_with(self, mapping: Callable[[E_co], U]) -> Either[T_co | U, E_co]: ...
+
+    @abstractmethod
+    def or_option_else(self, factory: Callable[[], Either[U, F]]) -> Either[T_co | U, E_co | F]: ...
+
+    @abstractmethod
+    def or_option_with(
+        self, mapping: Callable[[E_co], Either[U, F]]
+    ) -> Either[T_co | U, E_co | F]: ...
 
 
 @final
@@ -516,11 +560,11 @@ class Success(Either[T_co, Never]):
 
     @override
     def or_value(self, alternative: U) -> Either[T_co | U, Never]:
-        raise NotImplementedError
+        return self
 
     @override
-    def or_option(self, alternative: Either[U, Never]) -> Either[T_co | U, Never]:
-        raise NotImplementedError
+    def or_option(self, alternative: Either[U, F]) -> Either[T_co | U, F]:
+        return self
 
     @override
     def map(self, mapping: Callable[[T_co], U]) -> Either[U, Never]:
@@ -580,6 +624,24 @@ class Success(Either[T_co, Never]):
     def value_or_with(self, mapping: Callable[[Any], U]) -> T_co | U:
         return self.value
 
+    # ---- Alternatives (Task 5) --------------------------------------------
+
+    @override
+    def or_else(self, factory: Callable[[], U]) -> Either[T_co | U, Never]:
+        return self
+
+    @override
+    def or_with(self, mapping: Callable[[Any], U]) -> Either[T_co | U, Never]:
+        return self
+
+    @override
+    def or_option_else(self, factory: Callable[[], Either[U, F]]) -> Either[T_co | U, F]:
+        return self
+
+    @override
+    def or_option_with(self, mapping: Callable[[Any], Either[U, F]]) -> Either[T_co | U, F]:
+        return self
+
 
 @final
 class Failure(Either[Never, E_co]):
@@ -636,11 +698,11 @@ class Failure(Either[Never, E_co]):
 
     @override
     def or_value(self, alternative: U) -> Either[U, E_co]:
-        raise NotImplementedError
+        return Success(alternative)
 
     @override
-    def or_option(self, alternative: Either[U, E_co]) -> Either[U, E_co]:
-        raise NotImplementedError
+    def or_option(self, alternative: Either[U, F]) -> Either[U, E_co | F]:
+        return alternative
 
     @override
     def map(self, mapping: Callable[[Any], U]) -> Either[U, E_co]:
@@ -698,4 +760,22 @@ class Failure(Either[Never, E_co]):
 
     @override
     def value_or_with(self, mapping: Callable[[E_co], U]) -> U:
+        return mapping(self.exception)
+
+    # ---- Alternatives (Task 5) --------------------------------------------
+
+    @override
+    def or_else(self, factory: Callable[[], U]) -> Either[U, E_co]:
+        return Success(factory())
+
+    @override
+    def or_with(self, mapping: Callable[[E_co], U]) -> Either[U, E_co]:
+        return Success(mapping(self.exception))
+
+    @override
+    def or_option_else(self, factory: Callable[[], Either[U, F]]) -> Either[U, E_co | F]:
+        return factory()
+
+    @override
+    def or_option_with(self, mapping: Callable[[E_co], Either[U, F]]) -> Either[U, E_co | F]:
         return mapping(self.exception)
