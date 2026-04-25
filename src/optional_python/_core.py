@@ -112,6 +112,22 @@ class Option(ABC, Generic[T_co]):
     @abstractmethod
     def tap(self, fn: Callable[[T_co], object]) -> Self: ...
 
+    # ---- Match family (Task 3) --------------------------------------------
+
+    @abstractmethod
+    def match(self, *, some: Callable[[T_co], R], none: Callable[[], R]) -> R: ...
+
+    @abstractmethod
+    def match_some(self, action: Callable[[T_co], None]) -> None: ...
+
+    @abstractmethod
+    def match_none(self, action: Callable[[], None]) -> None: ...
+
+    # ---- Value extraction (Task 4) ----------------------------------------
+
+    @abstractmethod
+    def value_or_else(self, factory: Callable[[], U]) -> T_co | U: ...
+
 
 @final
 class Some(Option[T_co]):
@@ -160,7 +176,7 @@ class Some(Option[T_co]):
     def exists(self, predicate: Callable[[T_co], bool]) -> bool:
         return bool(predicate(self.value))
 
-    # Stub bodies — TODO Tasks 4-7 implement.
+    # Stub bodies — TODO Tasks 6-7 implement.
     @override
     def value_or(self, alternative: U) -> T_co | U:
         raise NotImplementedError
@@ -192,6 +208,26 @@ class Some(Option[T_co]):
     @override
     def tap(self, fn: Callable[[T_co], object]) -> Self:
         raise NotImplementedError
+
+    # ---- Match family (Task 3) --------------------------------------------
+
+    @override
+    def match(self, *, some: Callable[[T_co], R], none: Callable[[], R]) -> R:
+        return some(self.value)
+
+    @override
+    def match_some(self, action: Callable[[T_co], None]) -> None:
+        action(self.value)
+
+    @override
+    def match_none(self, action: Callable[[], None]) -> None:
+        pass
+
+    # ---- Value extraction (Task 4) ----------------------------------------
+
+    @override
+    def value_or_else(self, factory: Callable[[], U]) -> T_co | U:
+        return self.value
 
 
 @final
@@ -271,6 +307,26 @@ class Nothing(Option[Never]):
     @override
     def tap(self, fn: Callable[[Any], object]) -> Self:
         raise NotImplementedError
+
+    # ---- Match family (Task 3) --------------------------------------------
+
+    @override
+    def match(self, *, some: Callable[[Any], R], none: Callable[[], R]) -> R:
+        return none()
+
+    @override
+    def match_some(self, action: Callable[[Any], None]) -> None:
+        pass
+
+    @override
+    def match_none(self, action: Callable[[], None]) -> None:
+        action()
+
+    # ---- Value extraction (Task 4) ----------------------------------------
+
+    @override
+    def value_or_else(self, factory: Callable[[], U]) -> U:
+        return factory()
 
 
 def some(value: T) -> Some[T]:
@@ -385,6 +441,25 @@ class Either(ABC, Generic[T_co, E_co]):
     @abstractmethod
     def tap_failure(self, fn: Callable[[E_co], object]) -> Self: ...
 
+    # ---- Match family (Task 3) --------------------------------------------
+
+    @abstractmethod
+    def match(self, *, some: Callable[[T_co], R], none: Callable[[E_co], R]) -> R: ...
+
+    @abstractmethod
+    def match_some(self, action: Callable[[T_co], None]) -> None: ...
+
+    @abstractmethod
+    def match_none(self, action: Callable[[E_co], None]) -> None: ...
+
+    # ---- Value extraction (Task 4) ----------------------------------------
+
+    @abstractmethod
+    def value_or_else(self, factory: Callable[[], U]) -> T_co | U: ...
+
+    @abstractmethod
+    def value_or_with(self, mapping: Callable[[E_co], U]) -> T_co | U: ...
+
 
 @final
 class Success(Either[T_co, Never]):
@@ -481,6 +556,30 @@ class Success(Either[T_co, Never]):
     def tap_failure(self, fn: Callable[[Never], object]) -> Self:
         raise NotImplementedError
 
+    # ---- Match family (Task 3) --------------------------------------------
+
+    @override
+    def match(self, *, some: Callable[[T_co], R], none: Callable[[Any], R]) -> R:
+        return some(self.value)
+
+    @override
+    def match_some(self, action: Callable[[T_co], None]) -> None:
+        action(self.value)
+
+    @override
+    def match_none(self, action: Callable[[Any], None]) -> None:
+        pass
+
+    # ---- Value extraction (Task 4) ----------------------------------------
+
+    @override
+    def value_or_else(self, factory: Callable[[], U]) -> T_co | U:
+        return self.value
+
+    @override
+    def value_or_with(self, mapping: Callable[[Any], U]) -> T_co | U:
+        return self.value
+
 
 @final
 class Failure(Either[Never, E_co]):
@@ -576,3 +675,27 @@ class Failure(Either[Never, E_co]):
     @override
     def tap_failure(self, fn: Callable[[E_co], object]) -> Self:
         raise NotImplementedError
+
+    # ---- Match family (Task 3) --------------------------------------------
+
+    @override
+    def match(self, *, some: Callable[[Any], R], none: Callable[[E_co], R]) -> R:
+        return none(self.exception)
+
+    @override
+    def match_some(self, action: Callable[[Any], None]) -> None:
+        pass
+
+    @override
+    def match_none(self, action: Callable[[E_co], None]) -> None:
+        action(self.exception)
+
+    # ---- Value extraction (Task 4) ----------------------------------------
+
+    @override
+    def value_or_else(self, factory: Callable[[], U]) -> U:
+        return factory()
+
+    @override
+    def value_or_with(self, mapping: Callable[[E_co], U]) -> U:
+        return mapping(self.exception)
