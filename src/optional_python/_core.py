@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar, overload
 from typing_extensions import Never, Self, final, override
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Awaitable, Callable, Iterator
 
 T = TypeVar("T")  # invariant — used only in classmethod factories
 T_co = TypeVar("T_co", covariant=True)
@@ -142,6 +142,44 @@ class Option(ABC, Generic[T_co]):
 
     @abstractmethod
     def or_option_else(self, factory: Callable[[], Option[U]]) -> Option[T_co | U]: ...
+
+    # ---- Async surface (Task 12) ------------------------------------------
+
+    @abstractmethod
+    async def map_async(self, mapping: Callable[[T_co], Awaitable[U]]) -> Option[U]: ...
+
+    @abstractmethod
+    async def flat_map_async(
+        self, mapping: Callable[[T_co], Awaitable[Option[U]]]
+    ) -> Option[U]: ...
+
+    @abstractmethod
+    async def filter_async(self, predicate: Callable[[T_co], Awaitable[bool]]) -> Option[T_co]: ...
+
+    @abstractmethod
+    async def tap_async(self, fn: Callable[[T_co], Awaitable[object]]) -> Self: ...
+
+    @abstractmethod
+    async def match_async(
+        self, *, some: Callable[[T_co], Awaitable[R]], none: Callable[[], Awaitable[R]]
+    ) -> R: ...
+
+    @abstractmethod
+    async def match_some_async(self, action: Callable[[T_co], Awaitable[None]]) -> None: ...
+
+    @abstractmethod
+    async def match_none_async(self, action: Callable[[], Awaitable[None]]) -> None: ...
+
+    @abstractmethod
+    async def value_or_else_async(self, factory: Callable[[], Awaitable[U]]) -> T_co | U: ...
+
+    @abstractmethod
+    async def or_else_async(self, factory: Callable[[], Awaitable[U]]) -> Option[T_co | U]: ...
+
+    @abstractmethod
+    async def or_option_else_async(
+        self, factory: Callable[[], Awaitable[Option[U]]]
+    ) -> Option[T_co | U]: ...
 
 
 @final
@@ -285,6 +323,53 @@ class Some(Option[T_co]):
     def or_option_else(self, factory: Callable[[], Option[U]]) -> Option[T_co | U]:
         return self
 
+    # ---- Async surface (Task 12) ------------------------------------------
+
+    @override
+    async def map_async(self, mapping: Callable[[T_co], Awaitable[U]]) -> Option[U]:
+        return Some(await mapping(self.value))
+
+    @override
+    async def flat_map_async(self, mapping: Callable[[T_co], Awaitable[Option[U]]]) -> Option[U]:
+        return await mapping(self.value)
+
+    @override
+    async def filter_async(self, predicate: Callable[[T_co], Awaitable[bool]]) -> Option[T_co]:
+        return self if await predicate(self.value) else Nothing()
+
+    @override
+    async def tap_async(self, fn: Callable[[T_co], Awaitable[object]]) -> Self:
+        _ = await fn(self.value)
+        return self
+
+    @override
+    async def match_async(
+        self, *, some: Callable[[T_co], Awaitable[R]], none: Callable[[], Awaitable[R]]
+    ) -> R:
+        return await some(self.value)
+
+    @override
+    async def match_some_async(self, action: Callable[[T_co], Awaitable[None]]) -> None:
+        await action(self.value)
+
+    @override
+    async def match_none_async(self, action: Callable[[], Awaitable[None]]) -> None:
+        pass
+
+    @override
+    async def value_or_else_async(self, factory: Callable[[], Awaitable[U]]) -> T_co | U:
+        return self.value
+
+    @override
+    async def or_else_async(self, factory: Callable[[], Awaitable[U]]) -> Option[T_co | U]:
+        return self
+
+    @override
+    async def or_option_else_async(
+        self, factory: Callable[[], Awaitable[Option[U]]]
+    ) -> Option[T_co | U]:
+        return self
+
 
 @final
 @total_ordering
@@ -422,6 +507,50 @@ class Nothing(Option[Never]):
     @override
     def or_option_else(self, factory: Callable[[], Option[U]]) -> Option[U]:
         return factory()
+
+    # ---- Async surface (Task 12) ------------------------------------------
+
+    @override
+    async def map_async(self, mapping: Callable[[Any], Awaitable[U]]) -> Option[U]:
+        return self
+
+    @override
+    async def flat_map_async(self, mapping: Callable[[Any], Awaitable[Option[U]]]) -> Option[U]:
+        return self
+
+    @override
+    async def filter_async(self, predicate: Callable[[Any], Awaitable[bool]]) -> Option[Never]:
+        return self
+
+    @override
+    async def tap_async(self, fn: Callable[[Any], Awaitable[object]]) -> Self:
+        return self
+
+    @override
+    async def match_async(
+        self, *, some: Callable[[Any], Awaitable[R]], none: Callable[[], Awaitable[R]]
+    ) -> R:
+        return await none()
+
+    @override
+    async def match_some_async(self, action: Callable[[Any], Awaitable[None]]) -> None:
+        pass
+
+    @override
+    async def match_none_async(self, action: Callable[[], Awaitable[None]]) -> None:
+        await action()
+
+    @override
+    async def value_or_else_async(self, factory: Callable[[], Awaitable[U]]) -> U:
+        return await factory()
+
+    @override
+    async def or_else_async(self, factory: Callable[[], Awaitable[U]]) -> Option[U]:
+        return Some(await factory())
+
+    @override
+    async def or_option_else_async(self, factory: Callable[[], Awaitable[Option[U]]]) -> Option[U]:
+        return await factory()
 
 
 def some(value: T) -> Some[T]:
@@ -578,6 +707,102 @@ class Either(ABC, Generic[T_co, E_co]):
     def or_option_with(
         self, mapping: Callable[[E_co], Either[U, F]]
     ) -> Either[T_co | U, E_co | F]: ...
+
+    # ---- Async surface (Task 12) ------------------------------------------
+
+    @abstractmethod
+    async def map_async(self, mapping: Callable[[T_co], Awaitable[U]]) -> Either[U, E_co]: ...
+
+    @abstractmethod
+    async def flat_map_async(
+        self, mapping: Callable[[T_co], Awaitable[Either[U, F]]]
+    ) -> Either[U, E_co | F]: ...
+
+    @abstractmethod
+    async def map_failure_async(
+        self, mapping: Callable[[E_co], Awaitable[F]]
+    ) -> Either[T_co, F]: ...
+
+    @abstractmethod
+    async def filter_async(
+        self,
+        predicate: Callable[[T_co], Awaitable[bool]],
+        *,
+        exception: F | None = None,
+        exception_else: Callable[[], F] | None = None,
+    ) -> Either[T_co, E_co | F]: ...
+
+    @abstractmethod
+    async def tap_async(self, fn: Callable[[T_co], Awaitable[object]]) -> Self: ...
+
+    @abstractmethod
+    async def tap_failure_async(self, fn: Callable[[E_co], Awaitable[object]]) -> Self: ...
+
+    @abstractmethod
+    async def match_async(
+        self,
+        *,
+        some: Callable[[T_co], Awaitable[R]],
+        none: Callable[[E_co], Awaitable[R]],
+    ) -> R: ...
+
+    @abstractmethod
+    async def match_some_async(self, action: Callable[[T_co], Awaitable[None]]) -> None: ...
+
+    @abstractmethod
+    async def match_none_async(self, action: Callable[[E_co], Awaitable[None]]) -> None: ...
+
+    @abstractmethod
+    async def value_or_else_async(self, factory: Callable[[], Awaitable[U]]) -> T_co | U: ...
+
+    @abstractmethod
+    async def value_or_with_async(self, mapping: Callable[[E_co], Awaitable[U]]) -> T_co | U: ...
+
+    @abstractmethod
+    async def or_else_async(
+        self, factory: Callable[[], Awaitable[U]]
+    ) -> Either[T_co | U, E_co]: ...
+
+    @abstractmethod
+    async def or_with_async(
+        self, mapping: Callable[[E_co], Awaitable[U]]
+    ) -> Either[T_co | U, E_co]: ...
+
+    @abstractmethod
+    async def or_option_else_async(
+        self, factory: Callable[[], Awaitable[Either[U, F]]]
+    ) -> Either[T_co | U, E_co | F]: ...
+
+    @abstractmethod
+    async def or_option_with_async(
+        self, mapping: Callable[[E_co], Awaitable[Either[U, F]]]
+    ) -> Either[T_co | U, E_co | F]: ...
+
+    # ---- from_awaitable (Task 12) -----------------------------------------
+
+    @classmethod
+    async def from_awaitable(
+        cls,
+        awaitable: Awaitable[T],
+        catch: type[E] | tuple[type[E], ...] = Exception,
+    ) -> Either[T, E]:
+        """Lift an awaitable into Either, catching exceptions of type ``catch``.
+
+        Args:
+            awaitable: The coroutine or awaitable to run.
+            catch: Exception type(s) to catch. Defaults to ``Exception``.
+
+        Returns:
+            ``Success(value)`` if the awaitable completes normally,
+            ``Failure(exc)`` if an exception of type ``catch`` is raised.
+        """
+        try:
+            value = await awaitable
+        except BaseException as exc:  # narrowed below
+            if isinstance(exc, catch if isinstance(catch, tuple) else (catch,)):
+                return Failure(exc)  # type: ignore[arg-type]  # exc narrowed to catch type at runtime
+            raise
+        return Success(value)
 
 
 @final
@@ -769,6 +994,98 @@ class Success(Either[T_co, Never]):
     def or_option_with(self, mapping: Callable[[Any], Either[U, F]]) -> Either[T_co | U, F]:
         return self
 
+    # ---- Async surface (Task 12) ------------------------------------------
+
+    @override
+    async def map_async(self, mapping: Callable[[T_co], Awaitable[U]]) -> Either[U, Never]:
+        return Success(await mapping(self.value))
+
+    @override
+    async def flat_map_async(
+        self, mapping: Callable[[T_co], Awaitable[Either[U, F]]]
+    ) -> Either[U, F]:
+        return await mapping(self.value)
+
+    @override
+    async def map_failure_async(self, mapping: Callable[[Never], Awaitable[F]]) -> Either[T_co, F]:
+        return self
+
+    @override
+    async def filter_async(
+        self,
+        predicate: Callable[[T_co], Awaitable[bool]],
+        *,
+        exception: F | None = None,
+        exception_else: Callable[[], F] | None = None,
+    ) -> Either[T_co, F]:
+        if exception is not None and exception_else is not None:
+            msg = "filter_async() accepts exception or exception_else, not both"
+            raise TypeError(msg)
+        if await predicate(self.value):
+            return self
+        if exception is not None:
+            return Failure(exception)
+        if exception_else is not None:
+            return Failure(exception_else())
+        msg = "filter_async() requires exception or exception_else when predicate fails"
+        raise TypeError(msg)
+
+    @override
+    async def tap_async(self, fn: Callable[[T_co], Awaitable[object]]) -> Self:
+        _ = await fn(self.value)
+        return self
+
+    @override
+    async def tap_failure_async(self, fn: Callable[[Never], Awaitable[object]]) -> Self:
+        return self
+
+    @override
+    async def match_async(
+        self,
+        *,
+        some: Callable[[T_co], Awaitable[R]],
+        none: Callable[[Any], Awaitable[R]],
+    ) -> R:
+        return await some(self.value)
+
+    @override
+    async def match_some_async(self, action: Callable[[T_co], Awaitable[None]]) -> None:
+        await action(self.value)
+
+    @override
+    async def match_none_async(self, action: Callable[[Any], Awaitable[None]]) -> None:
+        pass
+
+    @override
+    async def value_or_else_async(self, factory: Callable[[], Awaitable[U]]) -> T_co | U:
+        return self.value
+
+    @override
+    async def value_or_with_async(self, mapping: Callable[[Any], Awaitable[U]]) -> T_co | U:
+        return self.value
+
+    @override
+    async def or_else_async(self, factory: Callable[[], Awaitable[U]]) -> Either[T_co | U, Never]:
+        return self
+
+    @override
+    async def or_with_async(
+        self, mapping: Callable[[Any], Awaitable[U]]
+    ) -> Either[T_co | U, Never]:
+        return self
+
+    @override
+    async def or_option_else_async(
+        self, factory: Callable[[], Awaitable[Either[U, F]]]
+    ) -> Either[T_co | U, F]:
+        return self
+
+    @override
+    async def or_option_with_async(
+        self, mapping: Callable[[Any], Awaitable[Either[U, F]]]
+    ) -> Either[T_co | U, F]:
+        return self
+
 
 @final
 @total_ordering
@@ -941,6 +1258,86 @@ class Failure(Either[Never, E_co]):
     @override
     def or_option_with(self, mapping: Callable[[E_co], Either[U, F]]) -> Either[U, E_co | F]:
         return mapping(self.exception)
+
+    # ---- Async surface (Task 12) ------------------------------------------
+
+    @override
+    async def map_async(self, mapping: Callable[[Any], Awaitable[U]]) -> Either[U, E_co]:
+        return self
+
+    @override
+    async def flat_map_async(
+        self, mapping: Callable[[Any], Awaitable[Either[U, F]]]
+    ) -> Either[U, E_co | F]:
+        return self
+
+    @override
+    async def map_failure_async(self, mapping: Callable[[E_co], Awaitable[F]]) -> Either[Never, F]:
+        return Failure(await mapping(self.exception))
+
+    @override
+    async def filter_async(
+        self,
+        predicate: Callable[[Any], Awaitable[bool]],
+        *,
+        exception: F | None = None,
+        exception_else: Callable[[], F] | None = None,
+    ) -> Either[Never, E_co]:
+        return self
+
+    @override
+    async def tap_async(self, fn: Callable[[Any], Awaitable[object]]) -> Self:
+        return self
+
+    @override
+    async def tap_failure_async(self, fn: Callable[[E_co], Awaitable[object]]) -> Self:
+        _ = await fn(self.exception)
+        return self
+
+    @override
+    async def match_async(
+        self,
+        *,
+        some: Callable[[Any], Awaitable[R]],
+        none: Callable[[E_co], Awaitable[R]],
+    ) -> R:
+        return await none(self.exception)
+
+    @override
+    async def match_some_async(self, action: Callable[[Any], Awaitable[None]]) -> None:
+        pass
+
+    @override
+    async def match_none_async(self, action: Callable[[E_co], Awaitable[None]]) -> None:
+        await action(self.exception)
+
+    @override
+    async def value_or_else_async(self, factory: Callable[[], Awaitable[U]]) -> U:
+        return await factory()
+
+    @override
+    async def value_or_with_async(self, mapping: Callable[[E_co], Awaitable[U]]) -> U:
+        return await mapping(self.exception)
+
+    @override
+    async def or_else_async(self, factory: Callable[[], Awaitable[U]]) -> Either[U, E_co]:
+        return Success(await factory())
+
+    @override
+    async def or_with_async(self, mapping: Callable[[E_co], Awaitable[U]]) -> Either[U, E_co]:
+        return Success(await mapping(self.exception))
+
+    @override
+    async def or_option_else_async(
+        self, factory: Callable[[], Awaitable[Either[U, F]]]
+    ) -> Either[U, E_co | F]:
+        return await factory()
+
+    @override
+    async def or_option_with_async(
+        self, mapping: Callable[[E_co], Awaitable[Either[U, F]]]
+    ) -> Either[U, E_co | F]:
+        return await mapping(self.exception)
 
 
 # ---------------------------------------------------------------------------
