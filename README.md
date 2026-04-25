@@ -1,9 +1,53 @@
 # optional-python
 
-A Python port of the C# [`Optional`](https://github.com/nlkl/optional) library by `nlkl` —
-explicit, type-safe handling of optional values without relying on `None`.
+A Python port of the C# [`Optional`](https://github.com/nlkl/optional) library by `nlkl`,
+reframed for **Railway-Oriented Programming (ROP)** in idiomatic Python 3.10+.
 
-> Status: pre-implementation. Harness and tooling are set up; the port itself has not started.
+Provides two sum types and a fluent, type-safe combinator surface (sync and async):
+
+- `Option[T]` — `Some(value)` or `Nothing` (presence/absence).
+- `Either[T, E]` — `Success(value)` or `Failure(exception)` (success/failure).
+
+Pyright `--strict` clean. 100% line + branch coverage. 546 tests.
+
+```python
+from optional_python import Either, Failure, Success
+from optional_python.safe import safe
+
+@safe(catch=ValueError)
+def parse_age(raw: str) -> int:
+    return int(raw)
+
+def validate(age: int) -> Either[int, str]:
+    return Either.some(age) if 0 <= age <= 130 else Either.none("out of range")
+
+result = (
+    parse_age("42")
+    .map_failure(lambda e: f"parse: {e}")
+    .flat_map(validate)
+)
+
+match result:
+    case Success(age): print(f"got {age}")
+    case Failure(err): print(f"oops: {err}")
+    case _: pass  # Either is sealed
+```
+
+See `examples/` for runnable end-to-end demos:
+
+- `examples/01_option_basics.py` — `Option`, factories, fluent combinators, pattern matching.
+- `examples/02_either_rop.py` — `Either` ROP pipeline with `@safe`, `map_failure`, `tap`.
+- `examples/03_async_pipeline.py` — async ROP with `map_async`, `flat_map_async`, `Either.from_awaitable`.
+- `examples/04_collections_and_unsafe.py` — collection helpers + opt-in unsafe extraction.
+
+Run them:
+
+```bash
+uv run python examples/01_option_basics.py
+uv run python examples/02_either_rop.py
+uv run python examples/03_async_pipeline.py
+uv run python examples/04_collections_and_unsafe.py
+```
 
 ---
 
@@ -77,6 +121,7 @@ uv run ruff format --check .   # formatter
 uv run ruff check .            # linter (rules: ALL minus formatter conflicts)
 uv run pyright                 # type checker (strict, every report* = error)
 uv run pytest -q               # tests (filterwarnings = error)
+uv run pytest --cov            # tests + coverage (requires 100%)
 ```
 
 To **apply** instead of just checking:
@@ -97,13 +142,22 @@ working solo.
 
 ```
 optional-python/
-├── src/optional_python/   # shipped Python code (currently a stub)
-├── tests/                 # pytest tests
-├── reference/             # gitignored: clone of nlkl/optional (C# source) for porting reference
-├── .claude/               # Claude Code hooks + settings (project-scoped)
-├── pyproject.toml         # single source of truth: deps, ruff, pyright, pytest, uv config
-├── CLAUDE.md              # rules for AI agents working in this repo (DO-NOT list)
-└── .python-version        # 3.10 — pins dev interpreter to the support floor
+├── src/optional_python/      # shipped Python code
+│   ├── __init__.py           # public re-exports
+│   ├── _core.py              # Option/Either + concrete subclasses, sync + async
+│   ├── extensions.py         # some_not_none / some_when / none_when / from_optional
+│   ├── collections.py        # first_or_none / values / successes / failures …
+│   ├── unsafe.py             # value_or_failure / value_or_default / to_optional
+│   ├── safe.py               # @safe / @safe_async / call_safe
+│   └── py.typed              # PEP 561 marker
+├── tests/                    # pytest suite (546 tests; 100% line+branch coverage)
+├── examples/                 # runnable demo scripts
+├── reference/                # gitignored: clone of nlkl/optional (C# source) for porting reference
+├── docs/superpowers/         # design spec + implementation plan
+├── .claude/                  # Claude Code hooks + settings (project-scoped)
+├── pyproject.toml            # single source of truth: deps, ruff, pyright, pytest, uv config
+├── CLAUDE.md                 # rules for AI agents working in this repo (DO-NOT list)
+└── .python-version           # 3.10 — pins dev interpreter to the support floor
 ```
 
 The `reference/` folder is gitignored — clone the upstream C# source there with:

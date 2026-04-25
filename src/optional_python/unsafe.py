@@ -113,9 +113,9 @@ def value_or_failure(
         raise exc
 
     # Should never reach here for well-typed inputs, but guard defensively.
-    type_name = type(opt).__name__
-    msg = f"value_or_failure expects Option or Either, got {type_name!r}"
-    raise TypeError(msg)
+    type_name = type(opt).__name__  # pragma: no cover
+    msg = f"value_or_failure expects Option or Either, got {type_name!r}"  # pragma: no cover
+    raise TypeError(msg)  # pragma: no cover
 
 
 # ---------------------------------------------------------------------------

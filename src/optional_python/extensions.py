@@ -134,7 +134,7 @@ def some_not_none(
         return Failure(exception_else())
 
     # Unreachable: one of has_exception / has_exception_else is always True here.
-    raise RuntimeError("unreachable")  # noqa: EM101
+    raise RuntimeError("unreachable")  # noqa: EM101  # pragma: no cover
 
 
 # ---------------------------------------------------------------------------
@@ -208,7 +208,7 @@ def some_when(
     if exception_else is not None:
         return Failure(exception_else())
 
-    raise RuntimeError("unreachable")  # noqa: EM101
+    raise RuntimeError("unreachable")  # noqa: EM101  # pragma: no cover
 
 
 # ---------------------------------------------------------------------------
@@ -284,7 +284,7 @@ def none_when(
     if exception_else is not None:
         return Failure(exception_else())
 
-    raise RuntimeError("unreachable")  # noqa: EM101
+    raise RuntimeError("unreachable")  # noqa: EM101  # pragma: no cover
 
 
 # ---------------------------------------------------------------------------

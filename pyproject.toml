@@ -82,6 +82,16 @@ known-first-party = ["optional_python"]
     "PLW0108",  # unnecessary lambda  (test laziness via lambda is intentional)
     "RUF100",   # unused noqa  (covers test-file ignore directives)
 ]
+# Examples are runnable scripts; print() and demo idioms are intentional.
+"examples/**/*.py" = [
+    "INP001",   # examples/ is intentionally a non-package
+    "T201",     # print  (examples ARE demos that print)
+    "D100",     # module docstring already present at top
+    "D103",     # function docstrings not required in demo scripts
+    "ERA001",   # comments-as-code false positives
+    "S101",     # asserts permitted in demos
+    "PLR2004",  # magic numbers fine in demo data
+]
 
 [tool.ruff.format]
 preview = true
@@ -96,7 +106,7 @@ docstring-code-line-length = "dynamic"
 # Pyright — strict + every overrideable diagnostic bumped to "error".
 # ===========================================================================
 [tool.pyright]
-include = ["src", "tests"]
+include = ["src", "tests", "examples"]
 exclude = [
     "reference",
     "**/__pycache__",
