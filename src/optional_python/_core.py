@@ -6,6 +6,7 @@ Spec: docs/superpowers/specs/2026-04-26-optional-python-port-design.md
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from functools import total_ordering
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar, overload
 
 from typing_extensions import Never, Self, final, override
@@ -144,6 +145,7 @@ class Option(ABC, Generic[T_co]):
 
 
 @final
+@total_ordering
 class Some(Option[T_co]):
     """A present value. Spec §2.1."""
 
@@ -175,6 +177,22 @@ class Some(Option[T_co]):
     @override
     def __repr__(self) -> str:
         return f"Some({self.value!r})"
+
+    # ---- Ordering (Task 8) ------------------------------------------------
+
+    def __lt__(self, other: object) -> bool:
+        """Some(x) < Some(y) iff x < y; Nothing < Some(_) always."""
+        if isinstance(other, Some):
+            return bool(self.value < other.value)  # type: ignore[operator]
+        if isinstance(other, Nothing):
+            return False  # Some > Nothing
+        return NotImplemented
+
+    # ---- Pickle (Task 8) --------------------------------------------------
+
+    @override
+    def __reduce__(self) -> tuple[Any, tuple[Any]]:
+        return (some, (self.value,))
 
     # ---- Iteration --------------------------------------------------------
 
@@ -269,6 +287,7 @@ class Some(Option[T_co]):
 
 
 @final
+@total_ordering
 class Nothing(Option[Never]):
     """Singleton. @final + cached __new__ + Option[Never] superclass — spec §2.1, §13.6."""
 
@@ -299,6 +318,22 @@ class Nothing(Option[Never]):
     @override
     def __repr__(self) -> str:
         return "Nothing"
+
+    # ---- Ordering (Task 8) ------------------------------------------------
+
+    def __lt__(self, other: object) -> bool:
+        """Nothing < Some(_) always; Nothing == Nothing (handled by __eq__)."""
+        if isinstance(other, Nothing):
+            return False  # equal, not less than
+        if isinstance(other, Some):
+            return True  # Nothing < Some(_)
+        return NotImplemented
+
+    # ---- Pickle (Task 8) --------------------------------------------------
+
+    @override
+    def __reduce__(self) -> tuple[Any, tuple[()]]:
+        return (nothing, ())
 
     # ---- Iteration --------------------------------------------------------
 
@@ -546,6 +581,7 @@ class Either(ABC, Generic[T_co, E_co]):
 
 
 @final
+@total_ordering
 class Success(Either[T_co, Never]):
     """A green-track value. Spec §2.2."""
 
@@ -579,6 +615,22 @@ class Success(Either[T_co, Never]):
     @override
     def __repr__(self) -> str:
         return f"Success({self.value!r})"
+
+    # ---- Ordering (Task 8) ------------------------------------------------
+
+    def __lt__(self, other: object) -> bool:
+        """Success(x) < Success(y) iff x < y; Failure(_) < Success(_) always."""
+        if isinstance(other, Success):
+            return bool(self.value < other.value)  # type: ignore[operator]
+        if isinstance(other, Failure):
+            return False  # Success > Failure
+        return NotImplemented
+
+    # ---- Pickle (Task 8) --------------------------------------------------
+
+    @override
+    def __reduce__(self) -> tuple[Any, tuple[Any]]:
+        return (Success, (self.value,))
 
     # ---- Iteration --------------------------------------------------------
 
@@ -719,6 +771,7 @@ class Success(Either[T_co, Never]):
 
 
 @final
+@total_ordering
 class Failure(Either[Never, E_co]):
     """A red-track exception. Spec §2.2."""
 
@@ -752,6 +805,22 @@ class Failure(Either[Never, E_co]):
     @override
     def __repr__(self) -> str:
         return f"Failure({self.exception!r})"
+
+    # ---- Ordering (Task 8) ------------------------------------------------
+
+    def __lt__(self, other: object) -> bool:
+        """Failure(e1) < Failure(e2) iff e1 < e2; Failure(_) < Success(_) always."""
+        if isinstance(other, Failure):
+            return bool(self.exception < other.exception)  # type: ignore[operator]
+        if isinstance(other, Success):
+            return True  # Failure < Success
+        return NotImplemented
+
+    # ---- Pickle (Task 8) --------------------------------------------------
+
+    @override
+    def __reduce__(self) -> tuple[Any, tuple[Any]]:
+        return (Failure, (self.exception,))
 
     # ---- Iteration --------------------------------------------------------
 
