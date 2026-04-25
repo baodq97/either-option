@@ -7,6 +7,7 @@ from optional_python._core import (
     Option,
     Some,
     Success,
+    flatten,
     nothing,
     some,
 )
@@ -20,6 +21,7 @@ __all__ = [
     "OptionValueMissingError",
     "Some",
     "Success",
+    "flatten",
     "nothing",
     "some",
 ]

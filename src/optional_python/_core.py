@@ -6,7 +6,7 @@ Spec: docs/superpowers/specs/2026-04-26-optional-python-port-design.md
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar, overload
 
 from typing_extensions import Never, Self, final, override
 
@@ -98,7 +98,13 @@ class Option(ABC, Generic[T_co]):
     def or_option(self, alternative: Option[U]) -> Option[T_co | U]: ...
 
     @abstractmethod
-    def with_exception(self, exception: E_co) -> Either[T_co, E_co]: ...
+    def with_exception(self, exception: E) -> Either[T_co, E]: ...
+
+    @abstractmethod
+    def with_exception_else(self, factory: Callable[[], E]) -> Either[T_co, E]: ...
+
+    @abstractmethod
+    def not_none(self) -> Option[T_co]: ...
 
     @abstractmethod
     def map(self, mapping: Callable[[T_co], U]) -> Option[U]: ...
@@ -184,7 +190,6 @@ class Some(Option[T_co]):
     def exists(self, predicate: Callable[[T_co], bool]) -> bool:
         return bool(predicate(self.value))
 
-    # Stub bodies — TODO Tasks 6-7 implement.
     @override
     def value_or(self, alternative: U) -> T_co | U:
         return self.value
@@ -197,25 +202,40 @@ class Some(Option[T_co]):
     def or_option(self, alternative: Option[U]) -> Option[T_co | U]:
         return self
 
+    # ---- Interop (Task 7) ------------------------------------------------
+
     @override
-    def with_exception(self, exception: E_co) -> Either[T_co, E_co]:
-        raise NotImplementedError
+    def with_exception(self, exception: E) -> Either[T_co, E]:
+        return Success(self.value)
+
+    @override
+    def with_exception_else(self, factory: Callable[[], E]) -> Either[T_co, E]:
+        return Success(self.value)
+
+    @override
+    def not_none(self) -> Option[T_co]:
+        if self.value is None:
+            return Nothing()
+        return self
+
+    # ---- Map / flat_map / tap (Task 6) ------------------------------------
 
     @override
     def map(self, mapping: Callable[[T_co], U]) -> Option[U]:
-        raise NotImplementedError
+        return Some(mapping(self.value))
 
     @override
     def flat_map(self, mapping: Callable[[T_co], Option[U]]) -> Option[U]:
-        raise NotImplementedError
+        return mapping(self.value)
 
     @override
     def filter(self, predicate: Callable[[T_co], bool]) -> Option[T_co]:
-        raise NotImplementedError
+        return self if predicate(self.value) else Nothing()
 
     @override
     def tap(self, fn: Callable[[T_co], object]) -> Self:
-        raise NotImplementedError
+        _ = fn(self.value)
+        return self
 
     # ---- Match family (Task 3) --------------------------------------------
 
@@ -306,25 +326,37 @@ class Nothing(Option[Never]):
     def or_option(self, alternative: Option[U]) -> Option[U]:
         return alternative
 
+    # ---- Interop (Task 7) ------------------------------------------------
+
     @override
-    def with_exception(self, exception: E_co) -> Either[Never, E_co]:
-        raise NotImplementedError
+    def with_exception(self, exception: E) -> Either[Never, E]:
+        return Failure(exception)
+
+    @override
+    def with_exception_else(self, factory: Callable[[], E]) -> Either[Never, E]:
+        return Failure(factory())
+
+    @override
+    def not_none(self) -> Option[Never]:
+        return self
+
+    # ---- Map / flat_map / tap (Task 6) ------------------------------------
 
     @override
     def map(self, mapping: Callable[[Any], U]) -> Option[U]:
-        raise NotImplementedError
+        return self
 
     @override
     def flat_map(self, mapping: Callable[[Any], Option[U]]) -> Option[U]:
-        raise NotImplementedError
+        return self
 
     @override
     def filter(self, predicate: Callable[[Any], bool]) -> Option[Never]:
-        raise NotImplementedError
+        return self
 
     @override
     def tap(self, fn: Callable[[Any], object]) -> Self:
-        raise NotImplementedError
+        return self
 
     # ---- Match family (Task 3) --------------------------------------------
 
@@ -449,16 +481,24 @@ class Either(ABC, Generic[T_co, E_co]):
     def map_failure(self, mapping: Callable[[E_co], F]) -> Either[T_co, F]: ...
 
     @abstractmethod
-    def flat_map(self, mapping: Callable[[T_co], Either[U, E_co]]) -> Either[U, E_co]: ...
+    def flat_map(self, mapping: Callable[[T_co], Either[U, F]]) -> Either[U, E_co | F]: ...
 
     @abstractmethod
     def filter(
         self,
         predicate: Callable[[T_co], bool],
         *,
-        exception: E_co | None = None,
-        exception_else: Callable[[], E_co] | None = None,
-    ) -> Either[T_co, E_co]: ...
+        exception: F | None = None,
+        exception_else: Callable[[], F] | None = None,
+    ) -> Either[T_co, E_co | F]: ...
+
+    @abstractmethod
+    def not_none(
+        self,
+        exception: F | None = None,
+        *,
+        exception_else: Callable[[], F] | None = None,
+    ) -> Either[T_co, E_co | F]: ...
 
     @abstractmethod
     def without_exception(self) -> Option[T_co]: ...
@@ -566,17 +606,21 @@ class Success(Either[T_co, Never]):
     def or_option(self, alternative: Either[U, F]) -> Either[T_co | U, F]:
         return self
 
+    # ---- Map / flat_map / tap (Task 6) ------------------------------------
+
     @override
     def map(self, mapping: Callable[[T_co], U]) -> Either[U, Never]:
-        raise NotImplementedError
+        return Success(mapping(self.value))
 
     @override
     def map_failure(self, mapping: Callable[[Never], F]) -> Either[T_co, F]:
-        raise NotImplementedError
+        return self
 
     @override
     def flat_map(self, mapping: Callable[[T_co], Either[U, F]]) -> Either[U, F]:
-        raise NotImplementedError
+        return mapping(self.value)
+
+    # ---- Filter / not_none (Task 7) ---------------------------------------
 
     @override
     def filter(
@@ -586,19 +630,50 @@ class Success(Either[T_co, Never]):
         exception: F | None = None,
         exception_else: Callable[[], F] | None = None,
     ) -> Either[T_co, F]:
-        raise NotImplementedError
+        if exception is not None and exception_else is not None:
+            msg = "filter() accepts exception or exception_else, not both"
+            raise TypeError(msg)
+        if predicate(self.value):
+            return self
+        if exception is not None:
+            return Failure(exception)
+        if exception_else is not None:
+            return Failure(exception_else())
+        msg = "filter() requires exception or exception_else when predicate fails"
+        raise TypeError(msg)
+
+    @override
+    def not_none(
+        self,
+        exception: F | None = None,
+        *,
+        exception_else: Callable[[], F] | None = None,
+    ) -> Either[T_co, F]:
+        if self.value is not None:
+            return self
+        if exception is not None:
+            return Failure(exception)
+        if exception_else is not None:
+            return Failure(exception_else())
+        msg = "not_none() requires exception or exception_else when value is None"
+        raise TypeError(msg)
+
+    # ---- Interop (Task 7) ------------------------------------------------
 
     @override
     def without_exception(self) -> Option[T_co]:
-        raise NotImplementedError
+        return Some(self.value)
+
+    # ---- Tap (Task 6) ----------------------------------------------------
 
     @override
     def tap(self, fn: Callable[[T_co], object]) -> Self:
-        raise NotImplementedError
+        _ = fn(self.value)
+        return self
 
     @override
     def tap_failure(self, fn: Callable[[Never], object]) -> Self:
-        raise NotImplementedError
+        return self
 
     # ---- Match family (Task 3) --------------------------------------------
 
@@ -704,39 +779,57 @@ class Failure(Either[Never, E_co]):
     def or_option(self, alternative: Either[U, F]) -> Either[U, E_co | F]:
         return alternative
 
+    # ---- Map / flat_map / tap (Task 6) ------------------------------------
+
     @override
     def map(self, mapping: Callable[[Any], U]) -> Either[U, E_co]:
-        raise NotImplementedError
+        return self
 
     @override
     def map_failure(self, mapping: Callable[[E_co], F]) -> Either[Never, F]:
-        raise NotImplementedError
+        return Failure(mapping(self.exception))
 
     @override
-    def flat_map(self, mapping: Callable[[Any], Either[U, E_co]]) -> Either[U, E_co]:
-        raise NotImplementedError
+    def flat_map(self, mapping: Callable[[Any], Either[U, F]]) -> Either[U, E_co | F]:
+        return self
+
+    # ---- Filter / not_none (Task 7) ---------------------------------------
 
     @override
     def filter(
         self,
         predicate: Callable[[Any], bool],
         *,
-        exception: E_co | None = None,
-        exception_else: Callable[[], E_co] | None = None,
+        exception: F | None = None,
+        exception_else: Callable[[], F] | None = None,
     ) -> Either[Never, E_co]:
-        raise NotImplementedError
+        return self
+
+    @override
+    def not_none(
+        self,
+        exception: F | None = None,
+        *,
+        exception_else: Callable[[], F] | None = None,
+    ) -> Either[Never, E_co]:
+        return self
+
+    # ---- Interop (Task 7) ------------------------------------------------
 
     @override
     def without_exception(self) -> Option[Never]:
-        raise NotImplementedError
+        return Nothing()
+
+    # ---- Tap (Task 6) ----------------------------------------------------
 
     @override
     def tap(self, fn: Callable[[Any], object]) -> Self:
-        raise NotImplementedError
+        return self
 
     @override
     def tap_failure(self, fn: Callable[[E_co], object]) -> Self:
-        raise NotImplementedError
+        _ = fn(self.exception)
+        return self
 
     # ---- Match family (Task 3) --------------------------------------------
 
@@ -779,3 +872,39 @@ class Failure(Either[Never, E_co]):
     @override
     def or_option_with(self, mapping: Callable[[E_co], Either[U, F]]) -> Either[U, E_co | F]:
         return mapping(self.exception)
+
+
+# ---------------------------------------------------------------------------
+# Free functions (Task 6)
+# ---------------------------------------------------------------------------
+
+
+@overload
+def flatten(opt: Option[Option[T]]) -> Option[T]: ...
+
+
+@overload
+def flatten(opt: Either[Either[T, E], E]) -> Either[T, E]: ...
+
+
+def flatten(opt: Option[Option[T]] | Either[Either[T, E], E]) -> Option[T] | Either[T, E]:
+    """Flatten a nested Option or Either one level.
+
+    ``flatten(Some(Some(x)))`` → ``Some(x)``
+    ``flatten(Some(Nothing()))`` → ``Nothing``
+    ``flatten(Nothing())`` → ``Nothing``
+    ``flatten(Success(Success(x)))`` → ``Success(x)``
+    ``flatten(Success(Failure(e)))`` → ``Failure(e)``
+    ``flatten(Failure(e))`` → ``Failure(e)``
+    """
+    if isinstance(opt, Some):
+        return opt.value
+    if isinstance(opt, Nothing):
+        return opt
+    if isinstance(opt, Success):
+        return opt.value
+    # Failure — pass through.
+    # opt is Failure[Either[T,E], E]; the inner T-slot is unreachable (Never at
+    # runtime), so returning it as Either[T, E] is sound.  Pyright can't express
+    # "Failure[Either[T,E],E] <: Either[T,E]" because T_co is not yet narrowed.
+    return opt  # type: ignore[return-value]  # Failure pass-through; see comment above
