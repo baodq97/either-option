@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-04-26
+
+### Changed
+
+- CI: bumped `actions/checkout` v4 → v6, `astral-sh/setup-uv` v4 → v8.1.0,
+  `actions/upload-artifact` v4 → v7.
+
+### Added
+
+- Release workflow (`release.yml`) auto-publishes on `v*.*.*` tags via PyPI
+  trusted publisher (OIDC), runs full 5-version test matrix, and creates a
+  GitHub Release.
+- `dependabot.yml` for weekly updates of GitHub Actions and uv-managed
+  Python deps.
+- OSS docs: `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md`,
+  `CODE_OF_CONDUCT.md`, issue + PR templates.
+
 ## [0.1.0] - 2026-04-26
 
 ### Added
@@ -40,5 +57,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pyright `--strict` clean (every `report*` diagnostic = `error`).
 - Ruff with `select = ["ALL"]` clean.
 
-[Unreleased]: https://github.com/baodq97/either-option/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/baodq97/either-option/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/baodq97/either-option/releases/tag/v0.1.1
 [0.1.0]: https://github.com/baodq97/either-option/releases/tag/v0.1.0

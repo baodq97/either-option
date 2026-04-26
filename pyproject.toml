@@ -1,6 +1,6 @@
 [project]
 name = "either-option"
-version = "0.1.0"
+version = "0.1.1"
 description = "Railway-Oriented Programming for Python — Option[T] and Either[T, E] sum types with sync + async combinators, sealed pattern matching, and 100% branch coverage."
 readme = "README.md"
 requires-python = ">=3.10"
