@@ -44,7 +44,7 @@ jobs:
         id: meta
         run: |
           TAG="${GITHUB_REF_NAME#v}"
-          PYPROJECT_VERSION="$(uv run python -c 'import tomllib, pathlib; print(tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]["version"])')"
+          PYPROJECT_VERSION="$(grep -m1 '^version = ' pyproject.toml | cut -d'"' -f2)"
           echo "Tag version : $TAG"
           echo "pyproject   : $PYPROJECT_VERSION"
           if [ "$TAG" != "$PYPROJECT_VERSION" ]; then
