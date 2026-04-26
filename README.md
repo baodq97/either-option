@@ -1,5 +1,6 @@
 # either-option
 
+[![CI](https://github.com/baodq97/either-option/actions/workflows/ci.yml/badge.svg)](https://github.com/baodq97/either-option/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/either-option.svg)](https://pypi.org/project/either-option/)
 [![Python](https://img.shields.io/pypi/pyversions/either-option.svg)](https://pypi.org/project/either-option/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
