@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from optional_python import Either, Failure, Success
-from optional_python.safe import call_safe, safe, safe_async
+from either_option import Either, Failure, Success
+from either_option.safe import call_safe, safe, safe_async
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable

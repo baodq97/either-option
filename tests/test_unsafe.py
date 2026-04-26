@@ -1,4 +1,4 @@
-"""Tests for optional_python.unsafe — Task 11.
+"""Tests for either_option.unsafe — Task 11.
 
 Covers:
 - value_or_failure on Some/Success → returns inner value.
@@ -12,8 +12,8 @@ Covers:
 
 import pytest
 
-from optional_python import Failure, Nothing, Option, Some, Success
-from optional_python.unsafe import (
+from either_option import Failure, Nothing, Option, Some, Success
+from either_option.unsafe import (
     OptionValueMissingError,
     to_optional,
     value_or_default,
@@ -202,12 +202,12 @@ def test_to_optional_some_none_value_returns_none() -> None:
 
 
 def test_option_value_missing_error_importable_from_package() -> None:
-    from optional_python import OptionValueMissingError as E  # noqa: PLC0415
+    from either_option import OptionValueMissingError as E  # noqa: PLC0415
 
     assert E is OptionValueMissingError
 
 
 def test_option_value_missing_error_in_all() -> None:
-    import optional_python  # noqa: PLC0415
+    import either_option  # noqa: PLC0415
 
-    assert "OptionValueMissingError" in optional_python.__all__
+    assert "OptionValueMissingError" in either_option.__all__

@@ -1,6 +1,6 @@
 """Lift exception-raising callables into Either.
 
-Spec: docs/superpowers/specs/2026-04-26-optional-python-port-design.md §4.2
+Spec: docs/superpowers/specs/2026-04-26-either-option-port-design.md §4.2
 """
 
 from __future__ import annotations
@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, TypeVar
 
 from typing_extensions import ParamSpec
 
-from optional_python._core import Either, Failure, Success
+from either_option._core import Either, Failure, Success
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
@@ -35,7 +35,7 @@ def safe(
             never silently swallowed.
 
     Example:
-        >>> from optional_python.safe import safe
+        >>> from either_option.safe import safe
         >>> @safe(catch=ValueError)
         ... def parse_age(s: str) -> int:
         ...     return int(s)
@@ -70,7 +70,7 @@ def safe_async(
 
     Example:
         >>> import asyncio
-        >>> from optional_python.safe import safe_async
+        >>> from either_option.safe import safe_async
         >>> @safe_async(catch=ValueError)
         ... async def parse_age(s: str) -> int:
         ...     return int(s)
@@ -105,7 +105,7 @@ def call_safe(
     a decorated wrapper around.
 
     Example:
-        >>> from optional_python.safe import call_safe
+        >>> from either_option.safe import call_safe
         >>> call_safe(int, "42").value_or(-1)
         42
         >>> call_safe(int, "xx", catch=ValueError).is_failure

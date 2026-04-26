@@ -7,7 +7,7 @@ must accept them. If pyright rejects, the build fails.
 
 from typing_extensions import assert_type
 
-from optional_python import Either, Failure, Nothing, Option, Some, Success, nothing, some
+from either_option import Either, Failure, Nothing, Option, Some, Success, nothing, some
 
 
 def test_some_factory_returns_some_int() -> None:

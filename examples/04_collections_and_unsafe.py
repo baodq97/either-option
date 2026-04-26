@@ -6,8 +6,8 @@ Run:
 
 from __future__ import annotations
 
-from optional_python import Either, nothing, some
-from optional_python.collections import (
+from either_option import Either, nothing, some
+from either_option.collections import (
     element_at_or_none,
     failures,
     first_or_none,
@@ -16,7 +16,7 @@ from optional_python.collections import (
     successes,
     values,
 )
-from optional_python.unsafe import OptionValueMissingError, value_or_default, value_or_failure
+from either_option.unsafe import OptionValueMissingError, value_or_default, value_or_failure
 
 
 def main() -> None:

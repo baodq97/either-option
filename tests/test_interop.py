@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from optional_python import Either, Failure, Nothing, Option, Some, Success, nothing, some
+from either_option import Either, Failure, Nothing, Option, Some, Success, nothing, some
 
 # ---------------------------------------------------------------------------
 # Option.with_exception

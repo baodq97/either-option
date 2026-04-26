@@ -6,8 +6,8 @@ Run:
 
 from __future__ import annotations
 
-from optional_python import Nothing, Option, Some, nothing, some
-from optional_python.extensions import some_not_none, some_when
+from either_option import Nothing, Option, Some, nothing, some
+from either_option.extensions import some_not_none, some_when
 
 
 def find_user(uid: int) -> Option[str]:

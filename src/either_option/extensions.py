@@ -8,7 +8,7 @@ the ``ToOption`` / ``from_optional`` bridge from nullable Python types.
 
 Usage::
 
-    from optional_python.extensions import (
+    from either_option.extensions import (
         some_not_none,
         some_when,
         none_when,
@@ -38,7 +38,7 @@ from typing_extensions import overload
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-from optional_python._core import Either, Failure, Nothing, Option, Some, Success
+from either_option._core import Either, Failure, Nothing, Option, Some, Success
 
 __all__ = [
     "from_optional",

@@ -1,6 +1,6 @@
-"""optional-python: a Railway-Oriented port of the C# Optional library."""
+"""either-option: a Railway-Oriented port of the C# Optional library."""
 
-from optional_python._core import (
+from either_option._core import (
     Either,
     Failure,
     Nothing,
@@ -11,7 +11,7 @@ from optional_python._core import (
     nothing,
     some,
 )
-from optional_python.unsafe import OptionValueMissingError
+from either_option.unsafe import OptionValueMissingError
 
 __all__ = [
     "Either",

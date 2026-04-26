@@ -10,7 +10,7 @@ Covers:
 
 import pytest
 
-from optional_python import Either, Failure, Nothing, Option, Some, Success, nothing, some
+from either_option import Either, Failure, Nothing, Option, Some, Success, nothing, some
 
 # ---------------------------------------------------------------------------
 # Option.match — value-returning

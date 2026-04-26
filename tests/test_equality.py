@@ -1,6 +1,6 @@
 """Equality semantics — spec §5.1."""
 
-from optional_python import Either, Failure, Nothing, Some, nothing, some
+from either_option import Either, Failure, Nothing, Some, nothing, some
 
 
 def test_some_equal_when_inner_equal() -> None:

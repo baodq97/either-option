@@ -1,6 +1,6 @@
-"""optional-python core: Option[T] and Either[T, E] as ABC + @final subclasses.
+"""either-option core: Option[T] and Either[T, E] as ABC + @final subclasses.
 
-Spec: docs/superpowers/specs/2026-04-26-optional-python-port-design.md
+Spec: docs/superpowers/specs/2026-04-26-either-option-port-design.md
 """
 
 from __future__ import annotations
@@ -210,7 +210,7 @@ class Some(Option[T_co]):
 
     @override
     def __hash__(self) -> int:
-        return hash(("optional_python.Some", self.value))
+        return hash(("either_option.Some", self.value))
 
     @override
     def __repr__(self) -> str:
@@ -398,7 +398,7 @@ class Nothing(Option[Never]):
 
     @override
     def __hash__(self) -> int:
-        return hash(("optional_python.Nothing",))
+        return hash(("either_option.Nothing",))
 
     @override
     def __repr__(self) -> str:
@@ -835,7 +835,7 @@ class Success(Either[T_co, Never]):
 
     @override
     def __hash__(self) -> int:
-        return hash(("optional_python.Success", self.value))
+        return hash(("either_option.Success", self.value))
 
     @override
     def __repr__(self) -> str:
@@ -1117,7 +1117,7 @@ class Failure(Either[Never, E_co]):
 
     @override
     def __hash__(self) -> int:
-        return hash(("optional_python.Failure", self.exception))
+        return hash(("either_option.Failure", self.exception))
 
     @override
     def __repr__(self) -> str:

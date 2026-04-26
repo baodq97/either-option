@@ -10,7 +10,7 @@ Covers:
 - or_with / or_option_with: mapping receives the actual exception
 """
 
-from optional_python import Either, Nothing, Option, Some, Success, nothing, some
+from either_option import Either, Nothing, Option, Some, Success, nothing, some
 
 # ---------------------------------------------------------------------------
 # Option.or_value

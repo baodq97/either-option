@@ -1,9 +1,9 @@
-"""Collections helpers for optional_python — Task 10.
+"""Collections helpers for either_option — Task 10.
 
 Port of C# ``OptionCollectionExtensions``.  All functions are pure, lazy where
 the return type is ``Iterator``, and import-safe on Python 3.10+.
 
-Spec: docs/superpowers/specs/2026-04-26-optional-python-port-design.md §8
+Spec: docs/superpowers/specs/2026-04-26-either-option-port-design.md §8
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ import itertools
 from collections.abc import Callable, Iterable, Iterator, Mapping
 from typing import TypeVar
 
-from optional_python._core import Either, Failure, Option, Some, Success, nothing, some
+from either_option._core import Either, Failure, Option, Some, Success, nothing, some
 
 T = TypeVar("T")
 K = TypeVar("K")

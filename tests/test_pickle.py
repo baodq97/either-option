@@ -2,7 +2,7 @@
 
 import pickle
 
-from optional_python import Either, Failure, Nothing, Some, Success, nothing, some
+from either_option import Either, Failure, Nothing, Some, Success, nothing, some
 
 
 def test_some_round_trips() -> None:

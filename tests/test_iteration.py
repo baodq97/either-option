@@ -1,6 +1,6 @@
 """__iter__, to_iterable, __contains__, contains(), exists() — spec §3.5."""
 
-from optional_python import Either, nothing, some
+from either_option import Either, nothing, some
 
 
 def test_some_iterates_one_element() -> None:

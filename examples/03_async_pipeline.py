@@ -9,8 +9,8 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass
 
-from optional_python import Either, Failure, Success
-from optional_python.safe import safe_async
+from either_option import Either, Failure, Success
+from either_option.safe import safe_async
 
 
 @dataclass

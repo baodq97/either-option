@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from optional_python import Either, Failure, Nothing, Option, Success, nothing, some
+from either_option import Either, Failure, Nothing, Option, Success, nothing, some
 
 # ---------------------------------------------------------------------------
 # Option.filter

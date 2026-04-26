@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, TypeVar
 
 import pytest
 
-from optional_python import Either, Failure, Nothing, Option, Some, Success, nothing, some
+from either_option import Either, Failure, Nothing, Option, Some, Success, nothing, some
 
 if TYPE_CHECKING:
     from collections.abc import Coroutine

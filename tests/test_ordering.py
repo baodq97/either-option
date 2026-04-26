@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from optional_python import Failure, Option, Success, nothing, some
+from either_option import Failure, Option, Success, nothing, some
 
 # ---- Option ordering ------------------------------------------------------
 

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import optional_python
-from optional_python import Either, Failure, Nothing, Option, Success, flatten, nothing, some
+import either_option
+from either_option import Either, Failure, Nothing, Option, Success, flatten, nothing, some
 
 # ---------------------------------------------------------------------------
 # Option.map
@@ -329,14 +329,14 @@ def test_flatten_either_identity_preserved() -> None:
 
 
 # ---------------------------------------------------------------------------
-# flatten is exported from optional_python
+# flatten is exported from either_option
 # ---------------------------------------------------------------------------
 
 
 def test_flatten_in_public_api() -> None:
 
-    assert hasattr(optional_python, "flatten")
-    assert "flatten" in optional_python.__all__
+    assert hasattr(either_option, "flatten")
+    assert "flatten" in either_option.__all__
 
 
 # ---------------------------------------------------------------------------

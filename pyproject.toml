@@ -1,12 +1,52 @@
 [project]
-name = "optional-python"
+name = "either-option"
 version = "0.1.0"
-description = "Add your description here"
+description = "Railway-Oriented Programming for Python — Option[T] and Either[T, E] sum types with sync + async combinators, sealed pattern matching, and 100% branch coverage."
 readme = "README.md"
 requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Bao Do", email = "baoxaxi06@gmail.com" },
+]
+keywords = [
+    "option",
+    "optional",
+    "either",
+    "result",
+    "monad",
+    "railway-oriented-programming",
+    "rop",
+    "functional",
+    "typed",
+    "async",
+    "pattern-matching",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
 dependencies = [
     "typing-extensions>=4.15.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/baodq97/either-option"
+Repository = "https://github.com/baodq97/either-option"
+Issues = "https://github.com/baodq97/either-option/issues"
+"Upstream (C#)" = "https://github.com/nlkl/Optional"
 
 [build-system]
 requires = ["uv_build>=0.11,<0.12"]
@@ -66,7 +106,7 @@ convention = "google"
 ban-relative-imports = "all"
 
 [tool.ruff.lint.isort]
-known-first-party = ["optional_python"]
+known-first-party = ["either_option"]
 
 [tool.ruff.lint.per-file-ignores]
 # Tests must be allowed to use `assert` — that is literally how pytest works.
@@ -164,7 +204,7 @@ filterwarnings = ["error"]
 # ===========================================================================
 [tool.coverage.run]
 branch = true
-source = ["src/optional_python"]
+source = ["src/either_option"]
 omit = [
     "*/__pycache__/*",
 ]

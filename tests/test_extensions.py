@@ -1,4 +1,4 @@
-"""Tests for optional_python.extensions — Task 9."""
+"""Tests for either_option.extensions — Task 9."""
 
 from __future__ import annotations
 
@@ -9,8 +9,8 @@ import pytest
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-from optional_python import Either, Failure, Nothing, Option, Some, Success
-from optional_python.extensions import (
+from either_option import Either, Failure, Nothing, Option, Some, Success
+from either_option.extensions import (
     from_optional,
     none_when,
     some_not_none,
@@ -400,7 +400,7 @@ def test_none_when_either_form_returns_either_instance() -> None:
 
 
 def test_public_names_importable() -> None:
-    """All four helpers are importable from optional_python.extensions."""
+    """All four helpers are importable from either_option.extensions."""
     # Verify module-level imports at the top of this file resolve the right names.
     assert callable(some_not_none)
     assert callable(some_when)

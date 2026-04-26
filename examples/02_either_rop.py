@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from optional_python import Either, Failure, Success
-from optional_python.safe import call_safe, safe
+from either_option import Either, Failure, Success
+from either_option.safe import call_safe, safe
 
 
 @dataclass

@@ -1,4 +1,4 @@
-"""Tests for optional_python.collections — Task 10.
+"""Tests for either_option.collections — Task 10.
 
 Each function is exercised with: empty input, single match, multiple elements,
 no-match, and predicate variants where applicable.
@@ -6,8 +6,8 @@ no-match, and predicate variants where applicable.
 
 import itertools
 
-from optional_python._core import Either, Failure, Option, Success, nothing, some
-from optional_python.collections import (
+from either_option._core import Either, Failure, Option, Success, nothing, some
+from either_option.collections import (
     element_at_or_none,
     failures,
     first_or_none,

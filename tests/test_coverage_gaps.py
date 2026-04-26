@@ -6,7 +6,7 @@ import asyncio
 
 import pytest
 
-from optional_python import Either, Failure, Some, Success, nothing, some
+from either_option import Either, Failure, Some, Success, nothing, some
 
 # ---- Option.__bool__ -------------------------------------------------------
 

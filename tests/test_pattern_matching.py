@@ -1,6 +1,6 @@
 """__match_args__ + match/case — spec §10."""
 
-from optional_python import Either, Failure, Nothing, Option, Some, Success
+from either_option import Either, Failure, Nothing, Option, Some, Success
 
 
 def _opt(value: int | None) -> Option[int]:

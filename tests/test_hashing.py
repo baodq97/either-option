@@ -2,7 +2,7 @@
 
 import pytest
 
-from optional_python import Either, nothing, some
+from either_option import Either, nothing, some
 
 
 def test_some_is_hashable() -> None:

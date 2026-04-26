@@ -1,16 +1,16 @@
-"""optional-python unsafe module — value extraction without None-safety.
+"""either-option unsafe module — value extraction without None-safety.
 
 Mirrors the C# `Optional.Unsafe` namespace: callers must opt in by importing
 from this submodule explicitly.  The only name promoted to the top-level
-``optional_python`` package is ``OptionValueMissingError`` (per spec §6).
+``either_option`` package is ``OptionValueMissingError`` (per spec §6).
 
-Spec: docs/superpowers/specs/2026-04-26-optional-python-port-design.md §9
+Spec: docs/superpowers/specs/2026-04-26-either-option-port-design.md §9
 """
 
 from collections.abc import Callable
 from typing import TypeVar, overload
 
-from optional_python._core import Either, Failure, Nothing, Option, Some, Success
+from either_option._core import Either, Failure, Nothing, Option, Some, Success
 
 __all__ = [
     "OptionValueMissingError",

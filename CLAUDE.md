@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-This is a Python library (`optional-python`) supporting **Python 3.10+**, using the `uv_build` backend, src-layout, and `py.typed` marker. The minimum is 3.10 deliberately — the bulk of production Python is on 3.10/3.11, and a library exists to be installed, not to chase the newest interpreter.
+This is a Python library (`either-option`) supporting **Python 3.10+**, using the `uv_build` backend, src-layout, and `py.typed` marker. The minimum is 3.10 deliberately — the bulk of production Python is on 3.10/3.11, and a library exists to be installed, not to chase the newest interpreter.
 
 Below are rules to NOT violate when working in this repo. They are tuned to ship a top-quality, broadly-installable Python library.
 
@@ -14,7 +14,7 @@ Below are rules to NOT violate when working in this repo. They are tuned to ship
 - Do NOT swap the build backend away from `uv_build`.
 - Do NOT raise `requires-python` above `>=3.10` casually. Bumping the floor is a breaking change for downstream users — only do it for a concrete, justified reason (a dep dropped support, a needed stdlib feature, etc.) and call it out in CHANGELOG.
 - Do NOT lower `.python-version` to match `requires-python`'s floor either. **Develop and test on the minimum supported version (3.10)** so 3.11+/3.12+/3.13+/3.14+ syntax can't slip in by accident. CI should additionally test the newest stable.
-- Do NOT delete `src/optional_python/py.typed`. It is the PEP 561 marker that tells downstream type checkers this package ships types.
+- Do NOT delete `src/either_option/py.typed`. It is the PEP 561 marker that tells downstream type checkers this package ships types.
 - Do NOT ship `uv.lock` as a runtime artifact or read it from library code; libraries pin via `pyproject.toml`, applications pin via the lockfile.
 
 ## Dependencies — DO NOT
@@ -28,10 +28,10 @@ Below are rules to NOT violate when working in this repo. They are tuned to ship
 
 ## Public API — DO NOT
 
-- Do NOT export a name from `optional_python/__init__.py` without adding it to `__all__`. If `__all__` is missing, every non-underscore name becomes part of the public API by accident.
-- Do NOT put non-trivial logic, side effects, network calls, or heavy imports in `__init__.py`. Import time matters; users pay for it on every `import optional_python`.
+- Do NOT export a name from `either_option/__init__.py` without adding it to `__all__`. If `__all__` is missing, every non-underscore name becomes part of the public API by accident.
+- Do NOT put non-trivial logic, side effects, network calls, or heavy imports in `__init__.py`. Import time matters; users pay for it on every `import either_option`.
 - Do NOT expose a third-party type (e.g. `httpx.Response`, `pydantic.BaseModel`) in a public signature without re-exporting it. Hidden transitive types break IDE/typechecker UX for callers.
-- Do NOT hardcode `__version__` as a string literal. Read it from installed metadata (`importlib.metadata.version("optional-python")`) so wheel and source agree.
+- Do NOT hardcode `__version__` as a string literal. Read it from installed metadata (`importlib.metadata.version("either-option")`) so wheel and source agree.
 - Do NOT make a backwards-incompatible change (rename, remove, type-narrow a parameter, change return type, raise a new exception, change default) without a major version bump. Additive only on minor.
 - Do NOT add a CLI entry point, `__main__.py`, or `[project.scripts]` — this is a library, not an application.
 
@@ -70,13 +70,13 @@ These features exist but are NOT in 3.10. Do not use them in `src/` unconditiona
 - Do NOT use `os.path` for path manipulation in new code. Use `pathlib.Path`.
 - Do NOT use `print()` for diagnostics in library code. Use `logging.getLogger(__name__)` and never call `logging.basicConfig()` from library code — that's the application's job.
 - Do NOT call blocking I/O (`time.sleep`, `requests.get`, `open()` for large files, subprocess) from inside an `async def`. Use the async-native equivalent or `asyncio.to_thread` (3.9+, fine on 3.10).
-- Do NOT use relative imports that cross sibling subpackages (`from ..other_pkg import x`). Use absolute imports rooted at `optional_python.…`.
+- Do NOT use relative imports that cross sibling subpackages (`from ..other_pkg import x`). Use absolute imports rooted at `either_option.…`.
 - Do NOT silence a linter finding with `# noqa` without a code (`# noqa: E501`) — and prefer fixing the issue.
 - Do NOT shadow stdlib or builtin names (`id`, `type`, `list`, `dict`, `input`, `format`, `filter`, `map`).
 
 ## Tests — DO NOT
 
-- Do NOT put tests inside `src/optional_python/`. Tests live in a top-level `tests/` directory; only shipped code goes under `src/`.
+- Do NOT put tests inside `src/either_option/`. Tests live in a top-level `tests/` directory; only shipped code goes under `src/`.
 - Do NOT rely on import order, filesystem CWD, network access, real time (`time.sleep`, `datetime.now()`), or environment variables in tests. Inject a clock, fake the network, use `tmp_path`/`monkeypatch`.
 - Do NOT share mutable state between tests via module globals or class attributes. Each test must be independently runnable in any order.
 - Do NOT use `unittest.TestCase` style for new tests in this repo. Use plain `pytest` functions + fixtures.
