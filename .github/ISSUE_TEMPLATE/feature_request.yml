@@ -1,0 +1,31 @@
+name: Feature request
+description: Suggest a new combinator, helper, or behaviour
+title: "[feature] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: Describe the use case. Avoid jumping to a solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed API or behavior
+      description: Sketch the signature, semantics, and an example call site.
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Existing combinators, third-party libs, or workarounds you've already tried.
+  - type: textarea
+    id: upstream
+    attributes:
+      label: Upstream parity?
+      description: |
+        Does the C# `Optional` library (https://github.com/nlkl/Optional) have an equivalent? If yes, link it.

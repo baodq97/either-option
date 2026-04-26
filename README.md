@@ -185,6 +185,15 @@ It is purely for reading; nothing under `reference/` is built, tested, or shippe
 
 ---
 
+## Contributing
+
+PRs welcome. Read [`CONTRIBUTING.md`](CONTRIBUTING.md) for the dev setup,
+verify loop, and PR flow. Security issues: see [`SECURITY.md`](SECURITY.md).
+
+## Changelog
+
+See [`CHANGELOG.md`](CHANGELOG.md).
+
 ## Credits
 
 This project is a Python port of the C# [`Optional`](https://github.com/nlkl/Optional)

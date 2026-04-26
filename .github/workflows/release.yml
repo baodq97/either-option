@@ -1,0 +1,104 @@
+name: Release
+
+# Triggers when a tag matching v*.*.* is pushed (e.g. v0.1.0, v1.2.3).
+# Verifies the full quality gate, then publishes to PyPI via OIDC trusted publisher.
+# Requires a one-time setup at https://pypi.org/manage/account/publishing/ to register
+# this repository + workflow as a trusted publisher (no API token needed in secrets).
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  verify:
+    name: Verify before publish
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v8
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python-version }}
+      - run: uv sync
+      - run: uv run pytest --cov
+
+  build:
+    name: Build distribution
+    runs-on: ubuntu-latest
+    needs: verify
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v8
+        with:
+          enable-cache: true
+          python-version: "3.10"
+
+      - name: Verify tag matches pyproject version
+        id: meta
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PYPROJECT_VERSION="$(uv run python -c 'import tomllib, pathlib; print(tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]["version"])')"
+          echo "Tag version : $TAG"
+          echo "pyproject   : $PYPROJECT_VERSION"
+          if [ "$TAG" != "$PYPROJECT_VERSION" ]; then
+            echo "::error::Tag $TAG does not match pyproject version $PYPROJECT_VERSION"
+            exit 1
+          fi
+          echo "version=$TAG" >> "$GITHUB_OUTPUT"
+
+      - run: uv build
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  publish:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: pypi
+      url: https://pypi.org/project/either-option/${{ needs.build.outputs.version }}
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+          print-hash: true
+
+  github-release:
+    name: GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build, publish]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --generate-notes \
+            --title "${GITHUB_REF_NAME}" \
+            dist/*

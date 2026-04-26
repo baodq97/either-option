@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or usage help
+    url: https://github.com/baodq97/either-option/discussions
+    about: Please ask questions in Discussions, not in Issues.
+  - name: Security issue
+    url: https://github.com/baodq97/either-option/security/advisories/new
+    about: Report vulnerabilities privately; do not file a public issue.
