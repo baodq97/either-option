@@ -169,7 +169,6 @@ either-option/
 ├── tests/                    # pytest suite (545 tests; 100% line+branch coverage)
 ├── examples/                 # runnable demo scripts
 ├── reference/                # gitignored: clone of nlkl/Optional (C# source) for porting reference
-├── docs/superpowers/         # design spec + implementation plan
 ├── pyproject.toml            # single source of truth: deps, ruff, pyright, pytest, uv config
 ├── CLAUDE.md                 # rules for AI agents working in this repo
 └── .python-version           # 3.10 — pins dev interpreter to the support floor

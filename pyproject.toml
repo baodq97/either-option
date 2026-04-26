@@ -7,7 +7,7 @@ requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [
-    { name = "Bao Do", email = "baoxaxi06@gmail.com" },
+    { name = "Bao Do", email = "baodq97@gmail.com" },
 ]
 keywords = [
     "option",

@@ -2,9 +2,7 @@
 
 Mirrors the C# `Optional.Unsafe` namespace: callers must opt in by importing
 from this submodule explicitly.  The only name promoted to the top-level
-``either_option`` package is ``OptionValueMissingError`` (per spec §6).
-
-Spec: docs/superpowers/specs/2026-04-26-either-option-port-design.md §9
+``either_option`` package is ``OptionValueMissingError``.
 """
 
 from collections.abc import Callable

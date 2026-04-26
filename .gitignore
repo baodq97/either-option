@@ -12,6 +12,9 @@ wheels/
 # Reference / upstream sources for porting (not shipped, not tracked)
 reference/
 
+# Internal design / planning artifacts (not shipped)
+docs/superpowers/
+
 # Coverage data
 .coverage
 .coverage.*

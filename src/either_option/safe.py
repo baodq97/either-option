@@ -1,7 +1,4 @@
-"""Lift exception-raising callables into Either.
-
-Spec: docs/superpowers/specs/2026-04-26-either-option-port-design.md §4.2
-"""
+"""Lift exception-raising callables into Either."""
 
 from __future__ import annotations
 

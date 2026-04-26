@@ -1,9 +1,7 @@
-"""Collections helpers for either_option — Task 10.
+"""Collections helpers for either_option.
 
 Port of C# ``OptionCollectionExtensions``.  All functions are pure, lazy where
 the return type is ``Iterator``, and import-safe on Python 3.10+.
-
-Spec: docs/superpowers/specs/2026-04-26-either-option-port-design.md §8
 """
 
 from __future__ import annotations

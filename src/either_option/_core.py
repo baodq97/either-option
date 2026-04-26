@@ -1,7 +1,4 @@
-"""either-option core: Option[T] and Either[T, E] as ABC + @final subclasses.
-
-Spec: docs/superpowers/specs/2026-04-26-either-option-port-design.md
-"""
+"""either-option core: Option[T] and Either[T, E] as ABC + @final subclasses."""
 
 from __future__ import annotations
 
